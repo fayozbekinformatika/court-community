@@ -5,10 +5,10 @@ import { Request } from "express";
 import { PrismaService } from "../prisma/prisma.service";
 
 const cookieExtractor = (req: Request): string | null => {
-    if(req && req.cookies){
-        return req.cookies['access_token'];
-    }
-    return null;
+    const token = req?.cookies?.['access_token'];
+    console.log('[JwtStrategy] access_token cookie present:', Boolean(token));
+    if (token) console.log('[JwtStrategy] access_token cookie (first 10):', token.substring(0, 10));
+    return token ??
 }
 
 @Injectable()
