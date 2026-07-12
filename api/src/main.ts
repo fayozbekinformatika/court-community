@@ -16,6 +16,7 @@ async function bootstrap() {
     origin: 'https://court-community1.onrender.com',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
+    allowedHeaders: 'Content-Type, Authorization',
   });
 
   // Security: Global Validation Pipe
