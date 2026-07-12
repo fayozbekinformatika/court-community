@@ -13,7 +13,7 @@ async function bootstrap() {
 
   // enable CORS for frontend application
   app.enableCors({
-    origin: 'http://localhost:3000',
+    origin: 'https://court-community1.onrender.com',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
