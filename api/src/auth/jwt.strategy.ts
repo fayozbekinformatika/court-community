@@ -16,7 +16,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt'){
     constructor(private prisma: PrismaService){
         super({
             jwtFromRequest: cookieExtractor,
-            secretOrKey: process.env.JWT_SECRET_KEY || 'NO_secret_KEY_$404',
+            secretOrKey: process.env.SUPER_SECRET_KEY || 'NO_secret_KEY_$404',
         });
     }
     async validate(payload: { sub: string; email: string }){
