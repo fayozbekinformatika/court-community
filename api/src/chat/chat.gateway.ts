@@ -12,7 +12,7 @@ import { Server } from 'socket.io';
 import type { AuthenticatedSocket } from './types/chat.types'; // Use 'import type'
 import { PrismaService } from '../prisma/prisma.service';
 import { UnauthorizedException } from '@nestjs/common';
-import { User } from '@prisma/client';
+
 
 // DTO for a new message
 class SendMessageDto {
