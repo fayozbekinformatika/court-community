@@ -33,7 +33,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
     if (user) {
       // 1. Create the new socket connection
       // Our backend is on port 5000 (as you set)
-      const newSocket = io('http://localhost:5000', {
+      const newSocket = io('https://court-community.onrender.com', {
         // 2. This is the magic!
         // It tells the socket client to send the httpOnly cookie
         withCredentials: true,
