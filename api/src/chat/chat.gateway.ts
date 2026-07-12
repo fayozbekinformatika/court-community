@@ -10,7 +10,7 @@ import {
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import type { AuthenticatedSocket } from './types/chat.types'; // Use 'import type'
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { UnauthorizedException } from '@nestjs/common';
 import { User } from '@prisma/client';
 

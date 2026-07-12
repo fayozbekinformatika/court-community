@@ -5,10 +5,19 @@ import { Strategy, VerifyCallback } from 'passport-google-oauth20';
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor() {
+    const clientID = process.env.GOOGLE_CLIENT_ID || 'development-google-client-id';
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET || 'development-google-client-secret';
+
+    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+      console.warn(
+        'Google OAuth env vars are missing. Using placeholder credentials so the API can start in local development.',
+      );
+    }
+
     super({
-      clientID: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      callbackURL: 'http://localhost:3000/auth/google/callback',
+      clientID,
+      clientSecret,
+      callbackURL: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:3000/auth/google/callback',
       scope: ['email', 'profile'], // What info we want from Google
       passReqToCallback: false,
     });

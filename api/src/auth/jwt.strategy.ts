@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { Strategy } from 'passport-jwt';
 import { Request } from "express";
-import { PrismaService } from "src/prisma/prisma.service";
+import { PrismaService } from "../prisma/prisma.service";
 
 const cookieExtractor = (req: Request): string | null => {
     if(req && req.cookies){

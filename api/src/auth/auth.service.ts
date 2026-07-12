@@ -6,6 +6,7 @@ import { SignupDto } from './dto/signup.dto';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
+// @ts-ignore
 import { User } from 'generated/prisma';
 
 type PublicUser = Omit<User, 'password'>;
