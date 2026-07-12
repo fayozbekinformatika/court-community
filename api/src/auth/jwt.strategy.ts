@@ -7,15 +7,20 @@ import { PrismaService } from "../prisma/prisma.service";
 const cookieExtractor = (req: Request): string | null => {
     const token = req?.cookies?.['access_token'];
     console.log('[JwtStrategy] access_token cookie present:', Boolean(token));
-    if (token) console.log('[JwtStrategy] access_token cookie (first 10):', token.substring(0, 10));
-    return token ??
-}
+    if (token) {
+        console.log('[JwtStrategy] access_token cookie (first 10):', token.substring(0, 10));
+    }
+    return token ?? null;
+};
+
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt'){
     constructor(private prisma: PrismaService){
         super({
             jwtFromRequest: cookieExtractor,
+            // AuthService/AuthModule JWTni SUPER_SECRET_KEY bilan sign qilayapti.
+            // JwtStrategy ham aynan shuni ishlatishi kerak, aks holda /auth/profile 401 beradi.
             secretOrKey: process.env.SUPER_SECRET_KEY || 'NO_secret_KEY_$404',
         });
     }
@@ -34,5 +39,5 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt'){
 
         const { password, ...result } = user;
         return result;
-}
+    }
 }
