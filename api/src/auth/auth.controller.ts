@@ -18,6 +18,8 @@ export class AuthController {
         httpOnly: true,
         secure: true,
         sameSite: 'none',
+        // cookie cross-site bo'lgani uchun Domain ni qoldiramiz (host bo'yicha).
+        path: '/',
         expires: new Date(Date.now() + 1000 * 60 * 60), // 1 day
       });
         return user;
@@ -37,6 +39,7 @@ export class AuthController {
       httpOnly: true,
       secure: true,
       sameSite: 'none',
+      path: '/',
       expires: new Date(Date.now() + 1000 * 60 * 60 * 24), // 1 day
     });
 
