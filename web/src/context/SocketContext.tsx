@@ -37,6 +37,8 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
         // 2. This is the magic!
         // It tells the socket client to send the httpOnly cookie
         withCredentials: true,
+        // Some hosting/proxy setups break polling/upgrade. Force WS.
+        transports: ['websocket'],
       });
 
       // 3. Set up event listeners
