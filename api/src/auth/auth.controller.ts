@@ -15,11 +15,11 @@ export class AuthController {
       const { jwtToken, user } = await this.authService.signup(signupDto);
 
       res.cookie('access_token', jwtToken.access_token, {
-      httpOnly: true,
-      secure: false, // Set to true in production (HTTPS)
-      sameSite: 'lax',
-      expires: new Date(Date.now() + 1000 * 60 * 60), // 1 day
-    });
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        expires: new Date(Date.now() + 1000 * 60 * 60), // 1 day
+      });
         return user;
     }
 
@@ -35,8 +35,8 @@ export class AuthController {
     // 7. Set the cookie on the response
     res.cookie('access_token', jwtToken.access_token, {
       httpOnly: true,
-      secure: false, // Set to true in production (HTTPS)
-      sameSite: 'lax',
+      secure: true,
+      sameSite: 'none',
       expires: new Date(Date.now() + 1000 * 60 * 60 * 24), // 1 day
     });
 
