@@ -1,39 +1,74 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import helmet from 'helmet';
-import { ValidationPipe } from '@nestjs/common';
-import cookieParser from 'cookie-parser';
-import 'dotenv/config';
-import { AuthSocketAdapter } from './chat/auth-socket.adapter';
+import { Controller,Post,Body, UseGuards,Request,Get,Res } from '@nestjs/common';
+import { AuthService } from './auth.service';
+import { SignupDto } from './dto/signup.dto';
+import { AuthGuard } from '@nestjs/passport';
+import type { Response } from 'express';
 
-async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+@Controller('auth')
+export class AuthController {
+    constructor(private authService: AuthService) {}
 
-  app.use(helmet());
+    @Post('signup')
+    async signup(@Body() signupDto: SignupDto,
+    @Res({ passthrough: true }) res: Response) {
 
-  // enable CORS for frontend application
-  app.enableCors({
-    // Frontend domenlari: cookie/credentials ishlashi uchun ikkalasini ham allowed qilamiz.
-    origin: ['https://court-community1.onrender.com', 'https://court-community.onrender.com'],
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    credentials: true,
-    allowedHeaders: 'Content-Type, Authorization',
-  });
+      const { jwtToken, user } = await this.authService.signup(signupDto);
 
-  // Security: Global Validation Pipe
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true, // Strip properties that are not in the DTO
-      forbidNonWhitelisted: true, // Throw an error if non-DTO properties are sent
-      transform: true, // Automatically transform payloads to DTO instances
-    }),
-  );
+      res.cookie('access_token', jwtToken.access_token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        // cookie cross-site bo'lgani uchun Domain ni qoldiramiz (host bo'yicha).
+        path: '/',
+        expires: new Date(Date.now() + 1000 * 60 * 60), // 1 day
+      });
+        return user;
+    }
 
-  app.use(cookieParser());
+    @UseGuards(AuthGuard('local'))
+  @Post('login')
+  async login(
+    @Request() req,
+    @Res({ passthrough: true }) res: Response, // 5. Inject the Response object
+  ) {
+    // 6. Get the token and user from the service
+    const { jwtToken, user } = await this.authService.login(req.user as any);
 
-  app.useWebSocketAdapter(new AuthSocketAdapter(app));
+    // 7. Set the cookie on the response
+    res.cookie('access_token', jwtToken.access_token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      path: '/',
+      expires: new Date(Date.now() + 1000 * 60 * 60 * 24), // 1 day
+    });
 
-  await app.listen(process.env.PORT ?? 5001);
-  console.log(`Server is running on http://localhost:${process.env.PORT ?? 5001}`);
+    // 8. Return just the user data as the JSON payload
+    return { user };
+  }
+
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  async googleAuth(@Request() req) {
+    // Passport.js handles the redirect. This code won't even run.
+  }
+
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  async googleAuthRedirect(@Request() req: any) {
+    // 1. Find or create the user
+    const user = await this.authService.validateOAuthUser(req.user);
+    
+    // 2. Generate our own JWT for this user
+    return this.authService.login(user);
+  }
+
+  @UseGuards(AuthGuard('jwt')) // This is our "key-checker" bouncer
+  @Get('profile')
+  getProfile(@Request() req) {
+    // If the AuthGuard succeeds, our JwtStrategy has run,
+    // validated the user, and attached them to req.user.
+    // We just return the user object.
+    return req.user;
+  }
 }
-bootstrap();
