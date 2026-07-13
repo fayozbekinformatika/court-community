@@ -13,7 +13,8 @@ async function bootstrap() {
 
   // enable CORS for frontend application
   app.enableCors({
-    origin: 'https://court-community1.onrender.com',
+    // Frontend domenlari: cookie/credentials ishlashi uchun ikkalasini ham allowed qilamiz.
+    origin: ['https://court-community1.onrender.com', 'https://court-community.onrender.com'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
     allowedHeaders: 'Content-Type, Authorization',
