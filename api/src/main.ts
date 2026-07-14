@@ -13,7 +13,9 @@ async function bootstrap() {
 
   // enable CORS for frontend application
   app.enableCors({
-    origin: ['https://court-community1.onrender.com', 'https://court-community.onrender.com'],
+    // Next.js frontend origin'ini aniq whitelist qilish ba'zan Render’da mismatch bo‘lib qoladi.
+    // Request kelgan origin ni ruxsat beramiz (credentials bilan ishlashi uchun).
+    origin: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
     allowedHeaders: 'Content-Type, Authorization',
