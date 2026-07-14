@@ -14,11 +14,14 @@ export class AuthController {
 
       const { jwtToken, user } = await this.authService.signup(signupDto);
 
+      // Cookie cross-site bo'lsa SameSite=None, Secure=true bo'lishi kerak.
+      // Lekin sizning holatingizda frontend/back bir-biriga bog'liq subdomainlarda bo'lgani uchun
+      // domainni aniq beramiz: .onrender.com (ikkala hostga ham tushsin).
       res.cookie('access_token', jwtToken.access_token, {
         httpOnly: true,
         secure: true,
         sameSite: 'none',
-        // cookie cross-site bo'lgani uchun Domain ni qoldiramiz (host bo'yicha).
+        domain: '.onrender.com',
         path: '/',
         expires: new Date(Date.now() + 1000 * 60 * 60), // 1 day
       });
@@ -39,6 +42,7 @@ export class AuthController {
       httpOnly: true,
       secure: true,
       sameSite: 'none',
+      domain: '.onrender.com',
       path: '/',
       expires: new Date(Date.now() + 1000 * 60 * 60 * 24), // 1 day
     });
