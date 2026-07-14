@@ -11,7 +11,7 @@ import { GoogleStrategy } from './google.strategy';
   imports: [
     PassportModule,
     JwtModule.register({
-      secret: process.env.SUPER_SECRET_KEY || 'NO_secret_KEY_$404',
+      secret: process.env.JWT_SECRET || (() => { throw new Error('Missing env JWT_SECRET'); })(),
       signOptions: { expiresIn: '1d' },
     }),
   ],
