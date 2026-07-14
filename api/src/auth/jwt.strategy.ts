@@ -19,9 +19,10 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt'){
     constructor(private prisma: PrismaService){
         super({
             jwtFromRequest: cookieExtractor,
-            // AuthService/AuthModule JWTni SUPER_SECRET_KEY bilan sign qilayapti.
-            // JwtStrategy ham aynan shuni ishlatishi kerak, aks holda /auth/profile 401 beradi.
-            secretOrKey: process.env.SUPER_SECRET_KEY || 'NO_secret_KEY_$404',
+            // AuthService/AuthModule JWTni shu secret bilan sign qiladi.
+            // Shuning uchun JwtStrategy ham aynan shuni ishlatishi kerak, aks holda /auth/profile 401 beradi.
+            secretOrKey: process.env.JWT_SECRET || (() => { throw new Error('Missing env JWT_SECRET'); })(),
+
         });
     }
     async validate(payload: { sub: string; email: string }){
