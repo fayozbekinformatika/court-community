@@ -17,7 +17,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     super({
       clientID,
       clientSecret,
-      callbackURL: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:3000/auth/google/callback',
+      callbackURL: process.env.GOOGLE_CALLBACK_URL || 'https://court-community.onrender.com/auth/google/callback',
       scope: ['email', 'profile'], // What info we want from Google
       passReqToCallback: false,
     });
