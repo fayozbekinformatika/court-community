@@ -134,7 +134,7 @@ export default function SignUpPage() {
 
           {/* --- Google Button --- */}
           <Button asChild variant="outline" className="w-full">
-            <a href="http://localhost:5000/auth/google">
+            <a href="https://court-community.onrender.com/auth/google/callback">
               {/* Add Google Icon here later */}
               Sign in with Google
             </a>
