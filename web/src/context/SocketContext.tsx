@@ -34,12 +34,13 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
       // 1. Create the new socket connection
       // Our backend is on port 5000 (as you set)
       const newSocket = io('https://court-community.onrender.com', {
-        // 2. This is the magic!
-        // It tells the socket client to send the httpOnly cookie
-        withCredentials: true,
-        // Some hosting/proxy setups break polling/upgrade. Force WS.
-        transports: ['websocket'],
-      });
+  withCredentials: true,
+  transports: ['websocket'],
+  // Tokenni shu yerda yuboring:
+  auth: {
+    token: typeof window !== "undefined" ? localStorage.getItem("access_token") : null
+  }
+});
 
       // 3. Set up event listeners
       newSocket.on('connect', () => {
