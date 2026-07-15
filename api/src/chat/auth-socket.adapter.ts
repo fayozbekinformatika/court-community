@@ -20,38 +20,55 @@ export class AuthSocketAdapter extends IoAdapter {
   createIOServer(port: number, options?: ServerOptions): any {
     const server: Server = super.createIOServer(port, options);
 
-    server.use(async (socket: AuthenticatedSocket, next) => {
+    server.use(async (socket: any, next) => {
       console.log('--- New WebSocket Connection Attempt ---');
       try {
-        // 1. Get the cookie string
+        // 1. Try to get token from cookie, then headers/auth
         const cookieString = socket.handshake.headers.cookie;
-        if (!cookieString) {
-          console.error('Auth Error: No cookie string provided.');
-          return next(new Error('Authentication error: No cookie provided.'));
-        }
-        console.log('Found cookie header:', cookieString);
 
-        // 2. Parse the 'access_token'
-        const parsedCookies = cookie.parse(cookieString);
-        const token = parsedCookies['access_token'];
-        if (!token) {
-          console.error('Auth Error: "access_token" not found in cookies.');
-          return next(new Error('Authentication error: No access token.'));
+        let token: string | undefined;
+
+        // Try cookie first
+        if (cookieString) {
+          console.log('Found cookie header:', cookieString);
+          const parsedCookies = cookie.parse(cookieString);
+          token = parsedCookies['access_token'];
         }
+
+        // If no cookie token, try socket.handshake.auth.token
+        if (!token && (socket.handshake as any)?.auth?.token) {
+          token = (socket.handshake as any).auth.token;
+        }
+
+        // If still no token, try Authorization header
+        if (!token) {
+          const authHeader = socket.handshake.headers.authorization;
+          if (authHeader && typeof authHeader === 'string') {
+            // expected: "Bearer <token>" or just token
+            token = authHeader.startsWith('Bearer ') ? authHeader.slice('Bearer '.length) : authHeader;
+          }
+        }
+
+        if (!token) {
+          console.error('Auth Error: No token found in cookie/headers/auth.');
+          return next(new Error('Authentication error: No token provided.'));
+        }
+
         console.log('Extracted token:', token.substring(0, 10) + '...');
 
-        // 3. Verify the JWT
+        // 2. Verify the JWT
         console.log('Verifying token...');
         const payload = this.jwtService.verify(token, {
           secret: process.env.JWT_SECRET,
         });
         console.log('Token valid. Payload:', payload);
 
-        // 4. Find the user
+        // 3. Find the user
         console.log(`Finding user with ID: ${payload.sub}`);
         const user = await this.prisma.user.findUnique({
           where: { id: payload.sub },
         });
+
 
         if (!user) {
           console.error('Auth Error: User not found in database.');
@@ -63,8 +80,8 @@ export class AuthSocketAdapter extends IoAdapter {
         socket.user = user;
         console.log('--- Authentication Successful ---');
         next(); // Handshake successful!
-      } catch (error) {
-        console.error('Auth Error (Catch Block):', error.message);
+      } catch (error: any) {
+        console.error('Auth Error (Catch Block):', error?.message ?? error);
         next(new Error('Authentication error: Invalid token.'));
       }
     });
