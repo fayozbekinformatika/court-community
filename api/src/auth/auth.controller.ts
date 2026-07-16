@@ -41,10 +41,10 @@ export class AuthController {
       httpOnly: true,
       secure: true,
       sameSite: 'none',
-      domain: '.onrender.com',
       path: '/',
       expires: new Date(Date.now() + 1000 * 60 * 60 * 24), // 1 day
     });
+
 
     // 8. Return just the user data as the JSON payload
     return { user };
@@ -58,13 +58,28 @@ export class AuthController {
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
-  async googleAuthRedirect(@Request() req: any) {
+  async googleAuthRedirect(
+    @Request() req: any,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     // 1. Find or create the user
     const user = await this.authService.validateOAuthUser(req.user);
-    
+
     // 2. Generate our own JWT for this user
-    return this.authService.login(user);
+    const { jwtToken } = await this.authService.login(user);
+
+    // 3. Set cookie (same as username/password login)
+    res.cookie('access_token', jwtToken.access_token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      path: '/',
+      expires: new Date(Date.now() + 1000 * 60 * 60 * 24), // 1 day
+    });
+
+    return user;
   }
+
 
   @UseGuards(AuthGuard('jwt')) // This is our "key-checker" bouncer
   @Get('profile')
