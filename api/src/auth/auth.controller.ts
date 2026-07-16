@@ -21,7 +21,6 @@ export class AuthController {
         httpOnly: true,
         secure: true,
         sameSite: 'none',
-        domain: '.onrender.com',
         path: '/',
         expires: new Date(Date.now() + 1000 * 60 * 60), // 1 day
       });
