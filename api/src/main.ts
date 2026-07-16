@@ -13,9 +13,10 @@ async function bootstrap() {
 
   // enable CORS for frontend application
   app.enableCors({
-    // Next.js frontend origin'ini aniq whitelist qilish ba'zan Render’da mismatch bo‘lib qoladi.
-    // Request kelgan origin ni ruxsat beramiz (credentials bilan ishlashi uchun).
-    origin: true,
+    origin: [
+      'https://court-community.onrender.com',
+      'https://court-community1.onrender.com',
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
     allowedHeaders: 'Content-Type, Authorization',
@@ -35,6 +36,8 @@ async function bootstrap() {
   app.useWebSocketAdapter(new AuthSocketAdapter(app));
 
   await app.listen(process.env.PORT ?? 5001);
-  console.log(`Server is running on http://localhost:${process.env.PORT ?? 5001}`);
+  console.log(
+    `Server is running on http://localhost:${process.env.PORT ?? 5001}`,
+  );
 }
 bootstrap();
