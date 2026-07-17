@@ -1,4 +1,12 @@
-import { Controller,Post,Body, UseGuards,Request,Get,Res } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Request,
+  Get,
+  Res,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignupDto } from './dto/signup.dto';
 import { AuthGuard } from '@nestjs/passport';
@@ -6,35 +14,36 @@ import type { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
-    constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) {}
 
-    @Post('signup')
-    async signup(@Body() signupDto: SignupDto,
-    @Res({ passthrough: true }) res: Response) {
+  @Post('signup')
+  async signup(
+    @Body() signupDto: SignupDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { jwtToken, user } = await this.authService.signup(signupDto);
 
-      const { jwtToken, user } = await this.authService.signup(signupDto);
+    // Cookie cross-site bo'lsa SameSite=None, Secure=true bo'lishi kerak.
+    // Lekin sizning holatingizda frontend/back bir-biriga bog'liq subdomainlarda bo'lgani uchun
+    // domainni aniq beramiz: .onrender.com (ikkala hostga ham tushsin).
+    res.cookie('access_token', jwtToken.access_token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      path: '/',
+      expires: new Date(Date.now() + 1000 * 60 * 60), // 1 day
+    });
+    return user;
+  }
 
-      // Cookie cross-site bo'lsa SameSite=None, Secure=true bo'lishi kerak.
-      // Lekin sizning holatingizda frontend/back bir-biriga bog'liq subdomainlarda bo'lgani uchun
-      // domainni aniq beramiz: .onrender.com (ikkala hostga ham tushsin).
-      res.cookie('access_token', jwtToken.access_token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'none',
-        path: '/',
-        expires: new Date(Date.now() + 1000 * 60 * 60), // 1 day
-      });
-        return user;
-    }
-
-    @UseGuards(AuthGuard('local'))
+  @UseGuards(AuthGuard('local'))
   @Post('login')
   async login(
     @Request() req,
     @Res({ passthrough: true }) res: Response, // 5. Inject the Response object
   ) {
     // 6. Get the token and user from the service
-    const { jwtToken, user } = await this.authService.login(req.user as any);
+    const { jwtToken, user } = await this.authService.login(req.user);
 
     // 7. Set the cookie on the response
     res.cookie('access_token', jwtToken.access_token, {
@@ -44,7 +53,6 @@ export class AuthController {
       path: '/',
       expires: new Date(Date.now() + 1000 * 60 * 60 * 24), // 1 day
     });
-
 
     // 8. Return just the user data as the JSON payload
     return { user };
@@ -77,9 +85,13 @@ export class AuthController {
       expires: new Date(Date.now() + 1000 * 60 * 60 * 24), // 1 day
     });
 
-    return user;
-  }
+    const frontendUrl = process.env.FRONTEND_URL;
+    const redirectTo = frontendUrl
+      ? `${frontendUrl}/dashboard`
+      : 'https://court-community.onrender.com/dashboard';
 
+    return res.redirect(redirectTo);
+  }
 
   @UseGuards(AuthGuard('jwt')) // This is our "key-checker" bouncer
   @Get('profile')
